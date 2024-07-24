@@ -6,9 +6,10 @@ const path = require("path");
 require("dotenv").config();
 
 const areaRoutes = require("./routes/areas");
+const customerRoutes = require("./routes/customer");
 
 const app = express();
-const PORT = 5002;
+const PORT = 5005;
 
 // Connect to MongoDBkkk
 mongoose.connect(process.env.MONGODB_URI);
@@ -22,6 +23,7 @@ app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/areas", areaRoutes);
+app.use("/customers", customerRoutes);
 
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`)
