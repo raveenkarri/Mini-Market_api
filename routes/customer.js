@@ -2,13 +2,16 @@ const express = require("express");
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const Customer = require("../models/customerModel");
+const validateToken = require("../middleware/validateToken");
 
 router.post("/register", async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newCustomer = new Customer({
-      username: req.body.username,
+      username: username,
       password: hashedPassword,
     });
     const savedCustomer = await newCustomer.save();
@@ -17,32 +20,48 @@ router.post("/register", async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-router.get("/", async (req, res) => {
+
+router.post("/login", async (req, res) => {
   try {
-    const savedCustomer = await Customer.find();
-    res.status(201).json({ savedCustomer });
+    const { username, password } = req.body;
+    const customer = await Customer.findOne({ username });
+    if (!customer) {
+      return res.status(404).json({ message: "user Not Found" });
+    }
+    const match = await bcrypt.compare(password, customer.password);
+    if (!match) {
+      return res.status(200).json({
+        message: "Password incorrect",
+        customer,
+      });
+    }
+    const accessToken = jwt.sign(
+      {
+        user: {
+          id: customer._id,
+          username: customer.username,
+        },
+      },
+      process.env.API_SECRETE_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.status(200).json({ accessToken });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
-
-router.post("/login", async (req, res) => {
+router.get("/", validateToken, async (req, res) => {
   try {
-    const customer = await Customer.findOne({ username: req.body.username });
-    if (customer) {
-      const match = await bcrypt.compare(req.body.password, customer.password);
-      if (match) {
-        res
-          .status(200)
-          .json({ message: "Authentication successful", customer });
-      } else {
-        res.status(401).json({ message: "Invalid username or password" });
-      }
-    } else {
-      res.status(401).json({ message: "Invalid username or password" });
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
+
+    res.status(200).json({ message: "User Found", user: req.user }); // Corrected to return 200 OK
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ message: "Cant get User" });
   }
 });
 module.exports = router;
