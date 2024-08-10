@@ -48,7 +48,10 @@ router.post("/login", async (req, res) => {
       }
     );
     res.cookie("token", accessToken, {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day expiration
+      httpOnly: true, // Ensures the cookie is only accessible by the web server
+      secure: process.env.NODE_ENV === "production", // Cookie sent only over HTTPS in production
+      sameSite: "Lax", // Protect against CSRF
     });
 
     res.status(200).json({ accessToken });

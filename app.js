@@ -18,11 +18,13 @@ db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
 
 // Middleware
-app.use(cors()); // Add CORS support
-// {
-//     origin: "https://mini-market-blue.vercel.app", // Replace with your frontend URL
-//     credentials: true, // This allows cookies to be sent with requests
-//   }
+app.use(
+  cors({
+    origin: "https://mini-market-blue.vercel.app", // Replace with your frontend URL
+    credentials: true, // This allows cookies to be sent with requests
+  })
+); // Add CORS support
+
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
