@@ -20,7 +20,7 @@ db.once("open", () => console.log("Connected to Database"));
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://mini-market-api.onrender.com",
     methods: "GET,POST,PUT,DELETE", // Allowed methods
     credentials: true,
   })
