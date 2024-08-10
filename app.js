@@ -21,6 +21,7 @@ db.once("open", () => console.log("Connected to Database"));
 app.use(
   cors({
     origin: "https://mini-market-blue.vercel.app", // Replace with your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true, // This allows cookies to be sent with requests
   })
 ); // Add CORS support
