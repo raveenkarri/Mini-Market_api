@@ -3,6 +3,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const cookie = require("cookie-parser");
 const Customer = require("../models/customerModel");
 const validateToken = require("../middleware/validateToken");
 
@@ -32,7 +33,6 @@ router.post("/login", async (req, res) => {
     if (!match) {
       return res.status(200).json({
         message: "Password incorrect",
-        customer,
       });
     }
     const accessToken = jwt.sign(
@@ -47,6 +47,9 @@ router.post("/login", async (req, res) => {
         expiresIn: "1h",
       }
     );
+    res.cookie("token", accessToken, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
 
     res.status(200).json({ accessToken });
   } catch (err) {
@@ -64,4 +67,63 @@ router.get("/", validateToken, async (req, res) => {
     res.status(500).json({ message: "Cant get User" });
   }
 });
+
+router.post("/cartItems", validateToken, async (req, res) => {
+  try {
+    const { cartProducts } = req.body;
+    const id = req.user.id;
+    console.log(cartProducts);
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      res.json({ message: "Customer not found" });
+    }
+
+    customer.cartProducts.push(...cartProducts);
+
+    await customer.save();
+
+    res.json({ message: "item added to cart" });
+  } catch (error) {
+    if (error) {
+      res.json({ message: "Error while posting item" });
+    }
+  }
+});
+router.get("/getItems", validateToken, async (req, res) => {
+  try {
+    const id = req.user.id;
+
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return res.json({ message: "Customer not found" });
+    }
+    const cartitems = customer.cartProducts;
+
+    res.json({ cartProducts: cartitems, user: req.user });
+  } catch (error) {
+    if (error) {
+      res.json({ message: "Error while posting item" });
+    }
+  }
+});
+router.delete("/delete/:id", validateToken, async (req, res) => {
+  try {
+    const deleteId = req.params.id;
+    const userid = req.user.id;
+    const customer = await Customer.findByIdAndUpdate(
+      userid,
+      {
+        $pull: { cartProducts: { _id: deleteId } },
+      },
+      { new: true }
+    );
+    if (!customer) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "Deleted Successfully" });
+  } catch (error) {
+    res.json({ message: "item not deleted" });
+  }
+});
+
 module.exports = router;

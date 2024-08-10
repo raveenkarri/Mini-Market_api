@@ -18,7 +18,13 @@ db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
 
 // Middleware
-app.use(cors()); // Add CORS support
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE", // Allowed methods
+    credentials: true,
+  })
+); // Add CORS support
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
