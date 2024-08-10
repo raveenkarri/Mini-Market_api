@@ -20,7 +20,7 @@ db.once("open", () => console.log("Connected to Database"));
 // Middleware
 app.use(
   cors({
-    origin: "https://mini-market-api.onrender.com",
+    origin: "https://mini-market-blue.vercel.app",
     methods: "GET,POST,PUT,DELETE", // Allowed methods
     credentials: true,
   })
