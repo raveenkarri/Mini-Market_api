@@ -18,11 +18,11 @@ db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
 
 // Middleware
+const allowedOrigins = ["https://mini-market-blue.vercel.app"];
 app.use(
   cors({
-    origin: "https://mini-market-blue.vercel.app",
-    methods: "GET,POST,PUT,DELETE", // Allowed methods
-    credentials: true,
+    origin: allowedOrigins,
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   })
 ); // Add CORS support
 app.use(bodyParser.json());
