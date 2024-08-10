@@ -65,7 +65,7 @@ router.get("/", validateToken, async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    res.status(200).json({ message: "User Found", user: req.user }); // Corrected to return 200 OK
+    res.status(200).json({ message: "User Found", user: req.user });
   } catch (err) {
     res.status(500).json({ message: "Cant get User" });
   }
