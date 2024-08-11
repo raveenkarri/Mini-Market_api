@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
 const areaRoutes = require("./routes/areas");
 const customerRoutes = require("./routes/customer");
@@ -25,7 +26,7 @@ app.use(
     credentials: true, // This allows cookies to be sent with requests
   })
 ); // Add CORS support
-
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes

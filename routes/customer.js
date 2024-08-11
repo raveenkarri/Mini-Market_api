@@ -3,7 +3,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie-parser");
+
 const Customer = require("../models/customerModel");
 const validateToken = require("../middleware/validateToken");
 
@@ -53,8 +53,11 @@ router.post("/login", async (req, res) => {
       secure: process.env.NODE_ENV === "production", // Cookie sent only over HTTPS in production
       sameSite: "Lax", // Protect against CSRF
     });
-
-    res.status(200).json({ accessToken });
+    if (accessToken) {
+      return res.status(200).json({ accessToken });
+    } else {
+      return res.json({ message: "No Autherization" });
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -75,10 +78,10 @@ router.post("/cartItems", validateToken, async (req, res) => {
   try {
     const { cartProducts } = req.body;
     const id = req.user.id;
-    console.log(cartProducts);
+
     const customer = await Customer.findById(id);
     if (!customer) {
-      res.json({ message: "Customer not found" });
+      return res.json({ message: "Customer not found" });
     }
 
     customer.cartProducts.push(...cartProducts);
@@ -105,7 +108,7 @@ router.get("/getItems", validateToken, async (req, res) => {
     res.json({ cartProducts: cartitems, user: req.user });
   } catch (error) {
     if (error) {
-      res.json({ message: "Error while posting item" });
+      return res.json({ message: "Error while posting item" });
     }
   }
 });
@@ -128,5 +131,12 @@ router.delete("/delete/:id", validateToken, async (req, res) => {
     res.json({ message: "item not deleted" });
   }
 });
-
+router.post("/logout", validateToken, (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.json({ message: "Logout Successful" });
+  } catch (error) {
+    res.json({ message: error });
+  }
+});
 module.exports = router;
