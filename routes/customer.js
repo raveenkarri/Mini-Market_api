@@ -104,7 +104,9 @@ router.get("/getItems", validateToken, async (req, res) => {
       return res.json({ message: "Customer not found" });
     }
     const cartitems = customer.cartProducts;
-
+    if (!cartitems) {
+      return res.json({ message: "No items Found" });
+    }
     res.json({ cartProducts: cartitems, user: req.user });
   } catch (error) {
     if (error) {
