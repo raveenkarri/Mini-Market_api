@@ -85,6 +85,9 @@ router.post("/", upload.array("images", 10), async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const areas = await Area.find();
+    if (!areas) {
+      return res.status(404).json({ message: "Areas not found!" });
+    }
     res.json(areas);
   } catch (error) {
     console.error("Error fetching areas:", error);
@@ -96,11 +99,10 @@ router.get("/:areaname", async (req, res) => {
   const { areaname } = req.params;
   try {
     const area = await findArea(areaname);
-    if (area) {
-      res.json(area);
-    } else {
+    if (!area) {
       res.status(404).json({ message: "Area not found" });
     }
+    res.status(200).json(area);
   } catch (error) {
     console.error("Error fetching area:", error);
     res.status(500).json({ message: "Server error", error });

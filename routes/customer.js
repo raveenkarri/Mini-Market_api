@@ -39,6 +39,7 @@ router.post("/login", async (req, res) => {
       {
         user: {
           id: customer._id,
+
           username: customer.username,
         },
       },
@@ -47,16 +48,11 @@ router.post("/login", async (req, res) => {
         expiresIn: "1h",
       }
     );
-    res.cookie("token", accessToken, {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day expiration
-      httpOnly: true, // Ensures the cookie is only accessible by the web server
-      secure: process.env.NODE_ENV === "production", // Cookie sent only over HTTPS in production
-      sameSite: "Lax", // Protect against CSRF
-    });
+
     if (accessToken) {
-      return res.status(200).json({ accessToken });
+      res.status(200).json({ accessToken });
     } else {
-      return res.json({ message: "No Autherization" });
+      res.json({ message: "No Autherization" });
     }
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -76,15 +72,15 @@ router.get("/", validateToken, async (req, res) => {
 
 router.post("/cartItems", validateToken, async (req, res) => {
   try {
-    const { cartProducts } = req.body;
+    const { productname, cost, description } = req.body;
     const id = req.user.id;
-
+    const cartProducts = { productname, cost, description };
     const customer = await Customer.findById(id);
     if (!customer) {
       return res.json({ message: "Customer not found" });
     }
 
-    customer.cartProducts.push(...cartProducts);
+    customer.cartProducts.push(cartProducts);
 
     await customer.save();
 
@@ -133,12 +129,5 @@ router.delete("/delete/:id", validateToken, async (req, res) => {
     res.json({ message: "item not deleted" });
   }
 });
-router.post("/logout", validateToken, (req, res) => {
-  try {
-    res.clearCookie("token");
-    res.json({ message: "Logout Successful" });
-  } catch (error) {
-    res.json({ message: error });
-  }
-});
+
 module.exports = router;
