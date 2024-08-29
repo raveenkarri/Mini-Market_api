@@ -3,6 +3,7 @@ const cartSchema = new mongoose.Schema({
   productname: { type: String },
   cost: { type: Number },
   description: { type: String },
+  imageUrl: { type: String },
 });
 const customerSchema = new mongoose.Schema({
   username: {

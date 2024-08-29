@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const validateToken = async (req, res, next) => {
+const validateShopToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.Authorization || req.headers.authorization;
     if (!authHeader) {
@@ -15,10 +15,10 @@ const validateToken = async (req, res, next) => {
       if (err) {
         return res.json({ message: "Error Token" });
       }
-      if (!decode.user) {
+      if (!decode.userShop) {
         return res.status(404).json({ message: "User Detailes not found" });
       }
-      req.user = decode.user;
+      req.userShop = decode.userShop;
 
       next();
     });
@@ -28,4 +28,4 @@ const validateToken = async (req, res, next) => {
   }
 };
 
-module.exports = validateToken;
+module.exports = validateShopToken;

@@ -10,6 +10,10 @@ const validateToken = require("../middleware/validateToken");
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
+    const user = await Customer.findOne({ username });
+    if (user) {
+      return res.status(400).json({ message: "user already registerd" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newCustomer = new Customer({
       username: username,
@@ -72,9 +76,9 @@ router.get("/", validateToken, async (req, res) => {
 
 router.post("/cartItems", validateToken, async (req, res) => {
   try {
-    const { productname, cost, description } = req.body;
+    const { productname, cost, description, imageUrl } = req.body;
     const id = req.user.id;
-    const cartProducts = { productname, cost, description };
+    const cartProducts = { productname, cost, description, imageUrl };
     const customer = await Customer.findById(id);
     if (!customer) {
       return res.json({ message: "Customer not found" });

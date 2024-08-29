@@ -1,28 +1,43 @@
+require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
+const ImageKit = require("imagekit");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const path = require("path");
-require("dotenv").config();
 
-const areaRoutes = require("./routes/areas");
+const ShopRoutes = require("./routes/Shops");
 const customerRoutes = require("./routes/customer");
+const dbConnection = require("./mongoDb/Dbconnection");
+dbConnection();
 
 const app = express();
 const PORT = 5005;
 
-// Connect to MongoDBkkk
-mongoose.connect(process.env.MONGODB_URI);
-const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("Connected to Database"));
+const imagekit = new ImageKit({
+  urlEndpoint: "https://ik.imagekit.io/fsbc1hx6u",
+  publicKey: "public_Fz5mhywWLJl5zB0i0lISiFEsUYM=",
+  privateKey: "private_C7WaH5AyQZ582gPofJcCMZRTc0I=",
+});
 
+//allow cross-origin requests
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
+app.get("/auth", function (req, res) {
+  var result = imagekit.getAuthenticationParameters();
+  res.send(result);
+});
 app.use(cors());
 
 app.use(bodyParser.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
-app.use("/areas", areaRoutes);
+app.use("/shops", ShopRoutes);
 app.use("/customers", customerRoutes);
 
 app.listen(PORT, () =>
